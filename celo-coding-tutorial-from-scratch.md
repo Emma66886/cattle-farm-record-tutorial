@@ -271,7 +271,7 @@ There are many tools and websites that developers can use to create coding tutor
 
 * AI and LLMs - AI assistants and large language models (LLMs) like [ChatGPT](https://chat.openai.com/) or [GitHub Co-pilot](https://github.com/features/copilot) can help you to create outlines for the tutorial, generate explanations for code, or answer questions.
 * Writing-enhancement - Tools like [Grammarly](https://app.grammarly.com/), [ProWritingAid](https://prowritingaid.com/), and [Hemingway Editor](https://hemingwayapp.com/) include grammar checkers, spell checkers, and thesauruses. These tools can help writers improve the accuracy and clarity of their writing.
-* Screen-recording - Tools like [Loom](https://), [OBS](https://obsproject.com/), or [Snagit](https://www.techsmith.com/screen-capture.html) allow users to capture their screen, which is particularly helpful when describing interfaces.
+* Screen-recording - Tools like [Loom](https://www.loom.com/), [OBS](https://obsproject.com/), or [Snagit](https://www.techsmith.com/screen-capture.html) allow users to capture their screen, which is particularly helpful when describing interfaces.
 
 
 **Where should I publish my tutorial?**
