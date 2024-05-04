@@ -92,9 +92,192 @@ The `is_employee_elegible` modifier checks if the sender of the transaction is a
 ### Admin functions
 #### Transfer admin or contract ownership
 ```solidity
+ //Admin or owner functions
  //Change admin
     function transfer_admin(address _new_admin)public is_owner returns (bool){
         owner = _new_admin;
         return owner == _new_admin;
     }
 ```
+The `transfer_admin` function takes the new admin wallet address as a parameter as `_new_adminn`, `is_owner` modifier is added to ensure only the owner of the contract can perform this action.
+
+#### Add Employee function
+```solidity
+//Add an employee
+    function add_employee(
+        bool _can_create_record,
+        string memory _name,
+        string memory _id_number,
+        string memory _other_employee_info,
+        address _employee_address)public is_owner returns(employee memory){
+        require(!employees[_employee_address].exists,"Employee already exist");
+        employees[_employee_address] = employee({
+        can_create_record:_can_create_record,
+         name:_name,
+         id_number:_id_number,
+         other_employee_info:_other_employee_info,
+         employee_address:_employee_address,
+         exists:true
+        });
+        employees_addresses.push(_employee_address);
+        return employees[_employee_address];
+    }
+```
+This function allows the contract owner to add an employee to the system. The function takes in the employee's details such as `can_create_record` (a boolean indicating if the employee can create farm records), `name`, `id_number`, `other_employee_info`, and `employee_address`. It checks if the employee already exists and then adds the employee to the `employees mapping` and `employees_addresses array`.
+
+#### Function to reset an employee's ability
+```solidity
+    // reset employee's ability to create farm record
+    function revoke_employee_authority(bool _can_create_record,address _employee)public is_owner returns(bool) {
+        require(employees[_employee].exists,"This employee does not exist");
+        employees[_employee].can_create_record = _can_create_record;
+        return employees[_employee].can_create_record == _can_create_record;
+    }
+```
+This function takes `_can_create_record` which is a boolean value(true or false) and the wallet address of the employee as a parameter and sets the employee's state
+
+#### Function to Create cattle farm record
+```solidity
+    //Create a Cattle farm record
+    function create_cattle_record(
+        int tagid,
+        int date_stocked,
+        string memory breed,
+        string memory stocked_from,
+        string memory other_descriptions
+    ) public is_employee_elegible returns(cattle memory){
+        require(!cattle_data_storage[tagid].exists,"Cattle already exist");
+        cattle_data_storage[tagid] = cattle({
+            tagid:tagid,
+            date_stocked:date_stocked,
+            total_expenses:0,
+            number_of_expenses:0,
+            breed:breed,
+            stocked_from:stocked_from,
+            other_descriptions:other_descriptions,
+            exists:true
+        });
+        cattle_ids.push(tagid);
+    return cattle_data_storage[tagid];
+    }
+```
+This function allows an eligible employee to create a cattle record. The function takes in the cattle's details such as `tagid`, `date_stocked`, `breed`, `stocked_from`, and `other_descriptions`. It checks if the cattle already exists and then creates a new cattle record in the `cattle_data_storage mapping` and adds the `tagid` to the `cattle_ids array`.
+
+
+#### Function to create an expense
+```solidity
+    //create an expense
+    function create_an_expense(int tagid,
+        int amount,
+        int date,
+        string memory description_and_other_info)public is_employee_elegible returns(cattle_expenses memory){
+        require(cattle_data_storage[tagid].exists,"Cattle does not exist or has not been recorded");
+        cattle memory current_cattle = cattle_data_storage[tagid];
+        cattle_expense_storage[tagid].push(cattle_expenses({
+             amount:amount,
+         date:date,
+         description_and_other_info:description_and_other_info
+        }));
+        current_cattle.total_expenses += amount;
+        current_cattle.number_of_expenses += 1;
+        cattle_data_storage[tagid] = current_cattle;
+        return cattle_expense_storage[tagid][uint(current_cattle.number_of_expenses)];
+    }
+```
+This function allows an eligible employee to record an expense for a specific cattle. The function takes in the `tagid` of the cattle, `amount`, `date`, and `description_and_other_info` of the `expense`. It checks if the cattle exists and then adds the expense to the `cattle_expense_storage mapping`. It also updates the total expenses and number of expenses for the cattle.
+
+### The update functions
+```solidity
+  //Update functions
+        function update_cattle_record(
+        int tagid,
+        int date_stocked,
+        string memory breed,
+        string memory stocked_from,
+        string memory other_descriptions
+    ) public is_employee_elegible returns(cattle memory){
+        require(cattle_data_storage[tagid].exists,"Cattle deos not exist");
+        cattle_data_storage[tagid] = cattle({
+            tagid:tagid,
+            date_stocked:date_stocked,
+            total_expenses:0,
+            number_of_expenses:0,
+            breed:breed,
+            stocked_from:stocked_from,
+            other_descriptions:other_descriptions,
+            exists:true
+        });
+    return cattle_data_storage[tagid];
+    }
+
+    //Update a cattle expense
+        function update_an_expense(int tagid,
+        int amount,
+        int date,
+        uint index,
+        string memory description_and_other_info)public is_employee_elegible returns(cattle_expenses memory){
+        require(cattle_data_storage[tagid].exists,"Cattle does not exist or has not been recorded"); // Ensure cattle is created in the cattle data storage
+        require(cattle_expense_storage[tagid].length > 0,"No expense record found for this cattle"); // Ensures tagid is valid
+        require((cattle_expense_storage[tagid].length - 1) >= index,"Index out of range"); // Ensures the index 
+        cattle memory current_cattle = cattle_data_storage[tagid];
+        current_cattle.total_expenses -= cattle_expense_storage[tagid][index].amount;
+        current_cattle.total_expenses += amount;
+        cattle_expense_storage[tagid][index] = (cattle_expenses({
+             amount:amount,
+         date:date,
+         description_and_other_info:description_and_other_info
+        }));
+        cattle_data_storage[tagid] = current_cattle;
+        return cattle_expense_storage[tagid][index];
+    }
+```
+These functions allow users to be able to update data for expenses on each cattle and also the data of each cattle.
+The `update_cattle_record` performs the function to update the cattle record, It takes the same parameters as the `cattle struct`,it has `require` function that ensures the tag id of the cattle is available before it can be updated.
+
+The `update_an_expense` acts to update expenses on each cattle.
+
+### The Get functions
+```solidity
+//Get functions
+    //get all the employees
+    function get_all_employees()public view returns(employee[] memory){
+        employee[] memory local_employee_data;
+        for (uint i =0; i < employees_addresses.length; i++) 
+        {
+            local_employee_data[i] = (employees[employees_addresses[i]]);
+        }
+        return local_employee_data;
+    }
+
+    // Get total farm expenses on all cattle
+    struct TotalfarmExpenses{
+        int total_amount; // this represents the total amount of money in the expense
+        cattle_expenses[] farm_expense; // this represent the array containing each expense
+    } // This struct represents the data type to be returned back to the user upon request
+
+    // Get all the farm expenses
+    function get_total_farm_expenses()public view returns(TotalfarmExpenses memory){
+        cattle_expenses[] memory local_cattle_expenses; // defining a local type of the cattle expenses array
+        int total_amount = 0;
+        uint counter =0; // total count of all the expenses
+        for (uint i = 0; i < cattle_ids.length; i++) 
+        {
+            for (uint j = 0; j < cattle_expense_storage[int(i)].length; j++) 
+            {
+                local_cattle_expenses[counter] = cattle_expense_storage[int(i)][j]; // getting the each cattle expense and adding it to the local defined variable local_cattle_expenses
+                total_amount += local_cattle_expenses[counter].amount; // calculating and adding the total amount spent in total
+                counter++;
+            }
+        }
+        return TotalfarmExpenses({
+            total_amount:total_amount,
+            farm_expense:local_cattle_expenses
+        });
+    }
+```
+
+The `get_all_employees` gets all the employees on the farm and returns their details to the caller. Note that this is a `view` function, the view here enables users to be able to get data from the blockchain.
+
+The `get_total_farm_expenses` get all the expenses in total from the farm.
+
+
