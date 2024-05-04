@@ -297,213 +297,149 @@ The `get_total_farm_expenses` get all the expenses in total from the farm.
 This is the complete code for this cattle farm record contract.
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity >0.8.0;
+pragma solidity ^0.8.0;
 
 contract CattleFarmRecord {
     address public owner; // The owner of the contract
-    struct employee{
-        bool can_create_record;
+    
+    struct Employee {
+        bool canCreateRecord;
         string name;
-        string id_number;
-        string other_employee_info;
-        address employee_address;
+        string idNumber;
+        string otherEmployeeInfo;
         bool exists;
     } // A struct defining data of an employee
-    mapping (address => employee) public employees; // The record of all the employees in memory
-    address[] public employees_addresses; // The addresses of all the employees on the farm
-
-    struct cattle_expenses {
-        int amount;
-        int date;
-        string description_and_other_info;
+    
+    mapping (address => Employee) public employees; // The record of all the employees in memory
+    
+    struct CattleExpense {
+        uint256 amount;
+        uint256 date;
+        string descriptionAndOtherInfo;
     }
-    mapping (int => cattle_expenses[]) cattle_expense_storage; // This will map the tagid number of each cattle expense cost
-    struct cattle{
-        int tagid;
-        int date_stocked;
-        int total_expenses;
-        int number_of_expenses;
+    mapping (uint256 => CattleExpense[]) public cattleExpenseStorage; // This will map the tagid number of each cattle expense cost
+    
+    struct Cattle {
+        uint256 tagId;
+        uint256 dateStocked;
+        uint256 totalExpenses;
+        uint256 numberOfExpenses;
         string breed;
-        string stocked_from;
-        string other_descriptions;
+        string stockedFrom;
+        string otherDescriptions;
         bool exists;
     }
-    mapping (int => cattle) cattle_data_storage; // This will map the tagid number of each cattle 
-    int[] cattle_ids; //This is an array containg the ids of all cattles on the farm
+    mapping (uint256 => Cattle) public cattleDataStorage; // This will map the tagid number of each cattle 
+    
+    uint256[] public cattleIds; //This is an array containing the ids of all cattles on the farm
 
-    constructor(){
+    event EmployeeAdded(address indexed employeeAddress, string name);
+    event EmployeeAccessRevoked(address indexed employeeAddress);
+    event CattleRecordCreated(uint256 indexed tagId, string breed);
+    event CattleExpenseCreated(uint256 indexed tagId, uint256 expenseId, uint256 amount);
+    
+    modifier onlyOwner {
+        require(msg.sender == owner, "You are not the owner of this contract");
+        _;
+    }
+
+    modifier onlyEligibleEmployee {
+        require((employees[msg.sender].exists && employees[msg.sender].canCreateRecord) || msg.sender == owner, "You are not authorized to perform this action");
+        _;
+    }
+
+    constructor() {
         owner = msg.sender; //Setting the deployer of the contract as the owner
     }
 
-    //Modifiers
-    //Check if owner is the executional of this contract
-    modifier is_owner{
-        require(msg.sender == owner,"You are not the owner of this contract");
-        _;
+    function transferAdmin(address newAdmin) public onlyOwner returns (bool) {
+        owner = newAdmin;
+        return true;
     }
 
-    //Check if the caller of a function is an employee
-    modifier is_employee_elegible{
-        require((employees[msg.sender].exists && employees[msg.sender].can_create_record) || msg.sender == owner,"You are not authorized to perform this action");
-        _;
-    }
-
-
-    //Admin or owner functions
-    //Change admin
-    function transfer_admin(address _new_admin)public is_owner returns (bool){
-        owner = _new_admin;
-        return owner == _new_admin;
-    }
-
-    //Add an employee
-    function add_employee(
-        bool _can_create_record,
-        string memory _name,
-        string memory _id_number,
-        string memory _other_employee_info,
-        address _employee_address)public is_owner returns(employee memory){
-        require(!employees[_employee_address].exists,"Employee already exist");
-        employees[_employee_address] = employee({
-        can_create_record:_can_create_record,
-         name:_name,
-         id_number:_id_number,
-         other_employee_info:_other_employee_info,
-         employee_address:_employee_address,
-         exists:true
+    function addEmployee(
+        bool canCreateRecord,
+        string memory name,
+        string memory idNumber,
+        string memory otherEmployeeInfo,
+        address employeeAddress
+    ) public onlyOwner {
+        require(!employees[employeeAddress].exists, "Employee already exists");
+        employees[employeeAddress] = Employee({
+            canCreateRecord: canCreateRecord,
+            name: name,
+            idNumber: idNumber,
+            otherEmployeeInfo: otherEmployeeInfo,
+            exists: true
         });
-        employees_addresses.push(_employee_address);
-        return employees[_employee_address];
+        emit EmployeeAdded(employeeAddress, name);
     }
 
-    // reset employee's ability to create farm record
-    function revoke_employee_authority(bool _can_create_record,address _employee)public is_owner returns(bool) {
-        require(employees[_employee].exists,"This employee does not exist");
-        employees[_employee].can_create_record = _can_create_record;
-        return employees[_employee].can_create_record == _can_create_record;
+    function revokeEmployeeAccess(bool canCreateRecord, address employee) public onlyOwner {
+        require(employees[employee].exists, "This employee does not exist");
+        employees[employee].canCreateRecord = canCreateRecord;
+        emit EmployeeAccessRevoked(employee);
     }
 
-    //Create a Cattle farm record
-    function create_cattle_record(
-        int tagid,
-        int date_stocked,
+    function createCattleRecord(
+        uint256 tagId,
+        uint256 dateStocked,
         string memory breed,
-        string memory stocked_from,
-        string memory other_descriptions
-    ) public is_employee_elegible returns(cattle memory){
-        require(!cattle_data_storage[tagid].exists,"Cattle already exist");
-        cattle_data_storage[tagid] = cattle({
-            tagid:tagid,
-            date_stocked:date_stocked,
-            total_expenses:0,
-            number_of_expenses:0,
-            breed:breed,
-            stocked_from:stocked_from,
-            other_descriptions:other_descriptions,
-            exists:true
+        string memory stockedFrom,
+        string memory otherDescriptions
+    ) public onlyEligibleEmployee {
+        require(!cattleDataStorage[tagId].exists, "Cattle already exists");
+        cattleDataStorage[tagId] = Cattle({
+            tagId: tagId,
+            dateStocked: dateStocked,
+            totalExpenses: 0,
+            numberOfExpenses: 0,
+            breed: breed,
+            stockedFrom: stockedFrom,
+            otherDescriptions: otherDescriptions,
+            exists: true
         });
-        cattle_ids.push(tagid);
-    return cattle_data_storage[tagid];
+        cattleIds.push(tagId);
+        emit CattleRecordCreated(tagId, breed);
     }
 
-    //create an expense
-    function create_an_expense(int tagid,
-        int amount,
-        int date,
-        string memory description_and_other_info)public is_employee_elegible returns(cattle_expenses memory){
-        require(cattle_data_storage[tagid].exists,"Cattle does not exist or has not been recorded");
-        cattle memory current_cattle = cattle_data_storage[tagid];
-        cattle_expense_storage[tagid].push(cattle_expenses({
-             amount:amount,
-         date:date,
-         description_and_other_info:description_and_other_info
+    function createCattleExpense(
+        uint256 tagId,
+        uint256 amount,
+        uint256 date,
+        string memory descriptionAndOtherInfo
+    ) public onlyEligibleEmployee {
+        require(cattleDataStorage[tagId].exists, "Cattle does not exist or has not been recorded");
+        cattleDataStorage[tagId].totalExpenses += amount;
+        cattleDataStorage[tagId].numberOfExpenses += 1;
+        cattleExpenseStorage[tagId].push(CattleExpense({
+            amount: amount,
+            date: date,
+            descriptionAndOtherInfo: descriptionAndOtherInfo
         }));
-        current_cattle.total_expenses += amount;
-        current_cattle.number_of_expenses += 1;
-        cattle_data_storage[tagid] = current_cattle;
-        return cattle_expense_storage[tagid][uint(current_cattle.number_of_expenses)];
+        emit CattleExpenseCreated(tagId, cattleDataStorage[tagId].numberOfExpenses, amount);
     }
 
-    //Update functions
-        function update_cattle_record(
-        int tagid,
-        int date_stocked,
-        string memory breed,
-        string memory stocked_from,
-        string memory other_descriptions
-    ) public is_employee_elegible returns(cattle memory){
-        require(cattle_data_storage[tagid].exists,"Cattle deos not exist");
-        cattle_data_storage[tagid] = cattle({
-            tagid:tagid,
-            date_stocked:date_stocked,
-            total_expenses:0,
-            number_of_expenses:0,
-            breed:breed,
-            stocked_from:stocked_from,
-            other_descriptions:other_descriptions,
-            exists:true
-        });
-    return cattle_data_storage[tagid];
-    }
-
-    //Update a cattle expense
-        function update_an_expense(int tagid,
-        int amount,
-        int date,
-        uint index,
-        string memory description_and_other_info)public is_employee_elegible returns(cattle_expenses memory){
-        require(cattle_data_storage[tagid].exists,"Cattle does not exist or has not been recorded");
-        require(cattle_expense_storage[tagid].length > 0,"No expense record found for this cattle");
-        require((cattle_expense_storage[tagid].length - 1) >= index,"Index out of range");
-        cattle memory current_cattle = cattle_data_storage[tagid];
-        current_cattle.total_expenses -= cattle_expense_storage[tagid][index].amount;
-        current_cattle.total_expenses += amount;
-        cattle_expense_storage[tagid][index] = (cattle_expenses({
-             amount:amount,
-         date:date,
-         description_and_other_info:description_and_other_info
-        }));
-        cattle_data_storage[tagid] = current_cattle;
-        return cattle_expense_storage[tagid][index];
-    }
-
-    //Get functions
-    //get all the employees
-    function get_all_employees()public view returns(employee[] memory){
-        employee[] memory local_employee_data;
-        for (uint i =0; i < employees_addresses.length; i++) 
-        {
-            local_employee_data[i] = (employees[employees_addresses[i]]);
+    // Get all the employees
+    function getAllEmployees() public view returns (Employee[] memory) {
+        Employee[] memory localEmployeeData = new Employee[](employeesAddresses.length);
+        for (uint i = 0; i < employeesAddresses.length; i++) {
+            localEmployeeData[i] = employees[employeesAddresses[i]];
         }
-        return local_employee_data;
+        return localEmployeeData;
     }
 
     // Get total farm expenses on all cattles
-    struct TotalfarmExpenses{
-        int total_amount;
-        cattle_expenses[] farm_expense;
-    }
-
-    // Get all the farm expenses
-    function get_total_farm_expenses()public view returns(TotalfarmExpenses memory){
-        cattle_expenses[] memory local_cattle_expenses;
-        int total_amount = 0;
-        uint counter =0;
-        for (uint i = 0; i < cattle_ids.length; i++) 
-        {
-            for (uint j = 0; j < cattle_expense_storage[int(i)].length; j++) 
-            {
-                local_cattle_expenses[counter] = cattle_expense_storage[int(i)][j];
-                total_amount += local_cattle_expenses[counter].amount;
-                counter++;
+    function getTotalFarmExpenses() public view returns (uint256 totalAmount, CattleExpense[] memory farmExpenses) {
+        for (uint i = 0; i < cattleIds.length; i++) {
+            for (uint j = 0; j < cattleExpenseStorage[cattleIds[i]].length; j++) {
+                totalAmount += cattleExpenseStorage[cattleIds[i]][j].amount;
+                farmExpenses.push(cattleExpenseStorage[cattleIds[i]][j]);
             }
         }
-        return TotalfarmExpenses({
-            total_amount:total_amount,
-            farm_expense:local_cattle_expenses
-        });
     }
 }
+
 ```
 
 ## Setting up Remix for CELO Alfajores
