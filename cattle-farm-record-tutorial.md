@@ -49,7 +49,9 @@ contract CattleFarmRecord {
     }
     mapping (int => cattle) cattle_data_storage; // This will map the tagid number of each cattle 
     int[] cattle_ids; //This is an array containg the ids of all cattles on the farm
-
+     constructor(){
+        owner = msg.sender; //Setting the deployer of the contract as the owner
+    }
   ```
 The `owner` variable represents the address that owns the contract. Only the owner has the authority to perform administrative functions such as transferring ownership and adding employees.
 
@@ -65,3 +67,34 @@ The `cattle_data_storage` mapping stores the cattle data. It maps a cattle's `ta
 
 The `cattle_ids` array contains the IDs of all the cattle on the farm. It is used to iterate over all the cattle records.
 
+### Modifiers
+
+```solidity
+//Modifiers
+    //Check if owner is the executional of this contract
+    modifier is_owner{
+        require(msg.sender == owner,"You are not the owner of this contract");
+        _;
+    }
+
+    //Check if the caller of a function is an employee
+    modifier is_employee_elegible{
+        require((employees[msg.sender].exists && employees[msg.sender].can_create_record) || msg.sender == owner,"You are not authorized to perform this action");
+        _;
+    }
+```
+Modifiers ensure the reusability of authentications in multiple functions in the code.
+
+The `is_owner` modifier checks if the sender of the transaction is the owner or an admin of the contract.
+
+The `is_employee_elegible` modifier checks if the sender of the transaction is an employee or an admin of the smart contract.
+
+### Admin functions
+#### Transfer admin or contract ownership
+```solidity
+ //Change admin
+    function transfer_admin(address _new_admin)public is_owner returns (bool){
+        owner = _new_admin;
+        return owner == _new_admin;
+    }
+```
