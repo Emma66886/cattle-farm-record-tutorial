@@ -13,7 +13,7 @@ Before proceeding, ensure you have the following:
 - Celo testnet faucet [faucet](https://faucet.celo.org/alfajores)
 - Access to Remix IDE [Remix](https://remix.ethereum.org).
 
- ### Explanation of data structures and variables (User, Post, Comment)
+ ### Explanation of data structures and variables
  ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity >0.8.0;
@@ -51,7 +51,7 @@ contract CattleFarmRecord {
     int[] cattle_ids; //This is an array containg the ids of all cattles on the farm
 
   ```
-The **owner** variable represents the address that owns the contract. Only the owner has the authority to perform administrative functions such as transferring ownership and adding employees.
+The `**owner**` variable represents the address that owns the contract. Only the owner has the authority to perform administrative functions such as transferring ownership and adding employees.
 
 The **employee struct** defines the data of an employee. It includes fields such as **can_create_record** (a boolean indicating if the employee can create farm records), **name**, **id_number**, **other_employee_info**, **employee_address**, and **exists** (a boolean indicating if the employee exists in the system).
 
