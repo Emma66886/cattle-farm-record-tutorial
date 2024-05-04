@@ -48,6 +48,7 @@ contract CattleFarmRecord {
         int date;
         string description_and_other_info;
     }
+uint public cattles_expenses_length = 0; // Total number of expenses
     mapping (int => cattle_expenses[]) cattle_expense_storage; // This will map the tagid number of each cattle expense cost
     struct cattle{
         int tagid;
@@ -186,6 +187,7 @@ This function allows an eligible employee to create a cattle record. The functio
         string memory description_and_other_info)public is_employee_elegible returns(cattle_expenses memory){
         require(cattle_data_storage[tagid].exists,"Cattle does not exist or has not been recorded");
         cattle memory current_cattle = cattle_data_storage[tagid];
+        cattles_expenses_length++;
         cattle_expense_storage[tagid].push(cattle_expenses({
              amount:amount,
          date:date,
@@ -253,13 +255,17 @@ The `update_an_expense` acts to update expenses on each cattle.
 ```solidity
 //Get functions
     //get all the employees
-    function get_all_employees()public view returns(employee[] memory){
-        employee[] memory local_employee_data;
+    function get_all_employees()public view returns(employee[] memory ){
+        employee[] memory local_employee_data = new employee[](employees_addresses.length);
         for (uint i =0; i < employees_addresses.length; i++) 
         {
-            local_employee_data[i] = (employees[employees_addresses[i]]);
+            local_employee_data[i] = employees[employees_addresses[i]];
         }
         return local_employee_data;
+    }
+
+    function get_all_employees_address()public view returns(address[] memory){
+        return employees_addresses;
     }
 
     // Get total farm expenses on all cattle
@@ -269,16 +275,16 @@ The `update_an_expense` acts to update expenses on each cattle.
     } // This struct represents the data type to be returned back to the user upon request
 
     // Get all the farm expenses
-    function get_total_farm_expenses()public view returns(TotalfarmExpenses memory){
-        cattle_expenses[] memory local_cattle_expenses; // defining a local type of the cattle expenses array
+        function get_total_farm_expenses()public view returns(TotalfarmExpenses memory){
+        cattle_expenses[] memory local_cattle_expenses = new cattle_expenses[](cattles_expenses_length);
         int total_amount = 0;
-        uint counter =0; // total count of all the expenses
+        uint counter =0;
         for (uint i = 0; i < cattle_ids.length; i++) 
         {
             for (uint j = 0; j < cattle_expense_storage[int(i)].length; j++) 
             {
-                local_cattle_expenses[counter] = cattle_expense_storage[int(i)][j]; // getting the each cattle expense and adding it to the local defined variable local_cattle_expenses
-                total_amount += local_cattle_expenses[counter].amount; // calculating and adding the total amount spent in total
+                local_cattle_expenses[counter] = cattle_expense_storage[int(i)][j];
+                total_amount += local_cattle_expenses[counter].amount;
                 counter++;
             }
         }
@@ -297,7 +303,7 @@ The `get_total_farm_expenses` get all the expenses in total from the farm.
 This is the complete code for this cattle farm record contract.
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity >0.8.0;
+pragma solidity ^0.8.0;
 
 contract CattleFarmRecord {
     address public owner; // The owner of the contract
@@ -317,6 +323,7 @@ contract CattleFarmRecord {
         int date;
         string description_and_other_info;
     }
+     uint public cattles_expenses_length = 0; // Total number of expenses
     mapping (int => cattle_expenses[]) cattle_expense_storage; // This will map the tagid number of each cattle expense cost
     struct cattle{
         int tagid;
@@ -413,6 +420,7 @@ contract CattleFarmRecord {
         string memory description_and_other_info)public is_employee_elegible returns(cattle_expenses memory){
         require(cattle_data_storage[tagid].exists,"Cattle does not exist or has not been recorded");
         cattle memory current_cattle = cattle_data_storage[tagid];
+        cattles_expenses_length++;
         cattle_expense_storage[tagid].push(cattle_expenses({
              amount:amount,
          date:date,
@@ -469,13 +477,18 @@ contract CattleFarmRecord {
 
     //Get functions
     //get all the employees
-    function get_all_employees()public view returns(employee[] memory){
-        employee[] memory local_employee_data;
+    function get_all_employees()public view returns(employee[] memory ){
+        employee[] memory local_employee_data = new employee[](employees_addresses.length);
         for (uint i =0; i < employees_addresses.length; i++) 
         {
-            local_employee_data[i] = (employees[employees_addresses[i]]);
+            local_employee_data[i] = employees[employees_addresses[i]];
         }
         return local_employee_data;
+    }
+
+    function get_all_employees_address()public view returns(address[] memory){
+
+        return employees_addresses;
     }
 
     // Get total farm expenses on all cattles
@@ -486,7 +499,7 @@ contract CattleFarmRecord {
 
     // Get all the farm expenses
     function get_total_farm_expenses()public view returns(TotalfarmExpenses memory){
-        cattle_expenses[] memory local_cattle_expenses;
+        cattle_expenses[] memory local_cattle_expenses = new cattle_expenses[](cattles_expenses_length);
         int total_amount = 0;
         uint counter =0;
         for (uint i = 0; i < cattle_ids.length; i++) 
