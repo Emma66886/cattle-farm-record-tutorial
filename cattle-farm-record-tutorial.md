@@ -51,17 +51,17 @@ contract CattleFarmRecord {
     int[] cattle_ids; //This is an array containg the ids of all cattles on the farm
 
   ```
-The `**owner**` variable represents the address that owns the contract. Only the owner has the authority to perform administrative functions such as transferring ownership and adding employees.
+The `owner` variable represents the address that owns the contract. Only the owner has the authority to perform administrative functions such as transferring ownership and adding employees.
 
-The `**employee struct**` defines the data of an employee. It includes fields such as `**can_create_record**` (a boolean indicating if the employee can create farm records), `**name**`, `**id_number**`, `**other_employee_info**`, `**employee_address**`, and `**exists**` (a boolean indicating if the employee exists in the system).
+The `employee struct` defines the data of an employee. It includes fields such as `can_create_record` (a boolean indicating if the employee can create farm records), `name`, `id_number`, `other_employee_info`, `employee_address`, and `exists` (a boolean indicating if the employee exists in the system).
 
-The `**employees mapping**` stores the records of all the employees in memory. It maps an employee's address to their corresponding `**employee struct**`
+The `employees mapping` stores the records of all the employees in memory. It maps an employee's address to their corresponding `employee struct`
 
-The `**cattle_expenses struct**` represents the expenses incurred for a specific cattle. It includes fields such as `**amount**` (the expense amount), `**date**` (the date of the expense), and `**description_and_other_info**` (additional information about the expense).
+The `cattle_expenses struct` represents the expenses incurred for a specific cattle. It includes fields such as `amount` (the expense amount), `date` (the date of the expense), and `description_and_other_info` (additional information about the expense).
 
-The `**cattle struct**` represents the data of a cattle. It includes fields such as `**tagid**` (a unique identifier for the cattle), `**date_stocked**` (the date the cattle was stocked), `**total_expenses**` (the total expenses incurred for the cattle), `**number_of_expenses**` (the number of expenses recorded for the cattle), `**breed**`, `**stocked_from**`, `**other_descriptions**`, and `**exists**` (a boolean indicating if the cattle exists in the system).
+The `cattle struct` represents the data of a cattle. It includes fields such as `tagid` (a unique identifier for the cattle), `date_stocked` (the date the cattle was stocked), `total_expenses` (the total expenses incurred for the cattle), `number_of_expenses` (the number of expenses recorded for the cattle), `breed`, `stocked_from`, `other_descriptions`, and `exists` (a boolean indicating if the cattle exists in the system).
 
-The `**cattle_data_storage**` mapping stores the cattle data. It maps a cattle's `**tagid**` to its corresponding cattle struct.
+The `cattle_data_storage` mapping stores the cattle data. It maps a cattle's `tagid` to its corresponding cattle struct.
 
-The `**cattle_ids**` array contains the IDs of all the cattle on the farm. It is used to iterate over all the cattle records.
+The `cattle_ids` array contains the IDs of all the cattle on the farm. It is used to iterate over all the cattle records.
 
