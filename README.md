@@ -28,7 +28,7 @@ Before proceeding, ensure you have the following:
  ### Explanation of data structures and variables
  ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity >0.8.0;
+pragma solidity ^0.8.0; //Ensure you are using compiler version between 0.8.0 and 0.8.19
 
 contract CattleFarmRecord {
     address public owner; // The owner of the contract
@@ -528,7 +528,7 @@ contract CattleFarmRecord {
 
 ### Compile and deploy
 On the left tab, click on `compile` icon at the top of the `farm_record.sol` file when opened in the editor.
-
+Ensure you are using compiler version between 0.8.0 and 0.8.19.
 Next, click on `compile farm_record.sol` to compile your contract.
 
 Upon successful compilation of your contracts, you should see a green check mark at the top of your file.
