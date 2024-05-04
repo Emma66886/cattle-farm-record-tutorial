@@ -1,5 +1,17 @@
 ## Tutorial: A Step-by-Step Guide to Building a Cattle Farm Record Smart Contract on CELO Alfajores
 
+## Table of content
+1. [Introduction](#introduction)
+2. [Prerequisites](#prerequisites)
+3. [Explanation of data structures and variables](#explanation-of-data-structures-and-variables)
+4. [Modifiers](#modifiers)
+5. [Admin functions](#admin-functions)
+6. [Employees functions](#employees-functions)
+7. [The update functions](#the-update-functions)
+8. [The Get functions](#the-get-functions)
+9. [Complete Code](#complete-code)
+10. [Setting up Remix for CELO Alfajores](#setting-up-remix-for-celo-alfajores)
+
 ### Introduction
 This article will guide you through the development of a smart contract for managing cattle farm records. Utilizing Solidity, the leading language for smart contracts, and the intuitive Remix IDE, we'll delve into the creation and deployment of a blockchain-driven social media platform.
 
@@ -136,6 +148,7 @@ This function allows the contract owner to add an employee to the system. The fu
 ```
 This function takes `_can_create_record` which is a boolean value(true or false) and the wallet address of the employee as a parameter and sets the employee's state
 
+### Employees functions
 #### Function to Create cattle farm record
 ```solidity
     //Create a Cattle farm record
